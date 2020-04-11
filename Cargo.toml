@@ -1,0 +1,34 @@
+[package]
+name = "storage-traits"
+version = "0.0.0"
+authors = ["Rahul Butani <rr.butani@gmail.com>"]
+edition = "2018"
+
+description = "Some traits for various storage mediums."
+homepage = "https://github.com/rrbutani/storage-traits"
+
+readme = "README.md"
+
+keywords = ["embedded-hal", "storage", "flash"]
+categories = ["no-std", "embedded"]
+
+license = "MIT"
+
+
+[badges]
+github-actions = { repository = "ut-utp/prototype", workflow = "full" }
+codecov = { repository = "rrbutani/storage-traits", branch = "master", service = "github" }
+
+is-it-maintained-issue-resolution = { repository = "rrbutani/storage-traits" }
+is-it-maintained-open-issues = { repository = "rrbutani/storage-traits" }
+maintenance = { status = "actively-developed" }
+
+
+[dependencies]
+typenum = "1.11.2"
+generic-array = "0.13.2"
+
+
+[features]
+default = ["no_std"]
+no_std = []
