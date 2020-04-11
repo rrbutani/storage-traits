@@ -50,3 +50,6 @@ extern crate core; // makes rls actually look into the standard library (hack)
 mod bytes;
 pub use bytes::*;
 
+mod storage;
+pub use storage::*;
+
