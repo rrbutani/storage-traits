@@ -2,6 +2,8 @@ on: [ push, pull_request ]
 
 name: full
 
+# TODO: build and deploy docs with nightly
+
 jobs:
   check:
     name: Check + test

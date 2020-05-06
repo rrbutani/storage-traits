@@ -2,9 +2,7 @@
 //!
 //! Useful for embedded applications.
 
-// TODO: forbid
 #![forbid(
-    bad_style,
     const_err,
     dead_code,
     improper_ctypes,
@@ -15,7 +13,6 @@
     patterns_in_fns_without_body,
     private_in_public,
     unconditional_recursion,
-    unused,
     unused_allocation,
     unused_lifetimes,
     unused_comparisons,
@@ -23,9 +20,11 @@
     while_true
 )]
 #![deny(
+    unused,
+    bad_style,
     missing_debug_implementations,
     intra_doc_link_resolution_failure,
-    missing_docs,
+    // missing_docs, // TODO!
     unsafe_code,
     trivial_casts,
     trivial_numeric_casts,
