@@ -35,7 +35,11 @@ pub trait AsBytes: Sized {
     ///
     /// As in, this should work:
     /// ```rust
-    /// assert_eq!(AsBytes::from(AsBytes::to(234u64).as_ref()), Some((234u64, &[])));
+    /// # use storage_traits::AsBytes;
+    /// assert_eq!(
+    ///     AsBytes::from(AsBytes::to(&234u64).as_ref()),
+    ///     Some((234u64, &[] as &[u8]))
+    /// );
     /// ```
     fn to(s: &Self) -> Self::To;
 }
