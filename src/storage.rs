@@ -174,4 +174,12 @@ pub trait Storage {
     //     sector_idx: usize,
     //     sectors: &[Self::Word]
     // ) -> Result<(), WriteError<Self::WriteErr>>;
+
+    // TODO!
+    // type EraseErr;
+    // turn Eraseable into a marker trait, move its function over to here.
+    // provide a default impl that just calls write_sector on an array of
+    // zeros for all sectors
+    // add a note cautioning that the default impl may allocate lots of
+    // stack space (1 whole sector's worth).
 }
