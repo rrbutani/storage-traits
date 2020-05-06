@@ -52,3 +52,4 @@ pub use bytes::*;
 mod storage;
 pub use storage::*;
 
+pub mod errors;
