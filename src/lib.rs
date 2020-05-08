@@ -139,6 +139,14 @@ using_std! {
                 ))
             }
         }
+
+        // Necessary when the provided files are weird (i.e. block files).
+        pub fn from_file_with_explicit_size<P: AsRef<Path>>(path: P, size_in_sectors: usize) -> IoResult<Self> {
+            let mut f = Self::from_file(path)?;
+            f.size_in_sectors = size_in_sectors;
+
+            Ok(f)
+        }
     }
 
     impl<W: AsBytes, S: ArrayLength<W>> Storage for FileBackedStorage<W, S> {
