@@ -71,7 +71,7 @@ using_std! {
     #[derive(Debug)]
     pub struct FileBackedStorage<
         Word = u8,
-        SECTOR_SIZE = typenum::consts::P512,
+        SECTOR_SIZE = typenum::consts::U512,
     >
     where
         Word: AsBytes,
@@ -122,7 +122,13 @@ using_std! {
 
             let len: usize = file.metadata()?.len().try_into().unwrap();
 
-            if let Some(_) = len.checked_rem(S::to_usize()) {
+            if let Some(0) = len.checked_rem(S::to_usize()) {
+                Ok(Self {
+                    file,
+                    size_in_sectors: (len.checked_div(S::to_usize()).unwrap()),
+                    _s: PhantomData,
+                })
+            } else {
                 Err(Error::new(
                     ErrorKind::InvalidInput,
                     format!(
@@ -131,12 +137,6 @@ using_std! {
                         S::to_usize(),
                     ),
                 ))
-            } else {
-                Ok(Self {
-                    file,
-                    size_in_sectors: (len.checked_div(S::to_usize()).unwrap()),
-                    _s: PhantomData,
-                })
             }
         }
     }
