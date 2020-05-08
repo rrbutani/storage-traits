@@ -174,6 +174,7 @@ using_std! {
             // do this without the intermediate buffer. Probably using unsafe.
             let sector_size_in_bytes = S::to_usize() * W::NUM_BYTES;
             let mut buf: Vec<u8> = Vec::with_capacity(sector_size_in_bytes);
+            buf.resize(sector_size_in_bytes, 0);
 
             assert_eq!(sector_size_in_bytes, self.file.read(&mut buf)?);
 
