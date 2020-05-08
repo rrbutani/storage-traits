@@ -31,6 +31,7 @@ use typenum::marker_traits::Unsigned;
 /// [extensions]: super::extensions
 pub trait Storage {
     /// This is really the 'read' level granularity.
+    // todo: update this doc comment
     type Word: AsBytes;
 
     /// This is really the 'write' level granularity.
@@ -69,7 +70,76 @@ pub trait Storage {
         self.capacity_in_words() * <Self::Word as AsBytes>::NUM_BYTES
     }
 
+    /// Reads in an entire sector.
+    ///
+    // TODO: docs!
+    fn read_sector(
+        &mut self,
+        sector_idx: usize,
+        buffer: &mut GenericArray<Self::Word, Self::SECTOR_SIZE>,
+    ) -> Result<(), ReadError<Self::ReadErr>>;
 
+    // TODO!
+    // fn read_sectors(&mut self, starting_sector_idx: usize, buffer: &mut [Self::Word])
+    // takes a flat array of bytes; it's length must be a multiple of the sector
+    // size in words.
+
+    /// Writes out an entire sector.
+    ///
+    /// `sector_idx` must be in [0, `self.capacity()`) for this to succeed.
+    ///
+    /// This function should never panic but can return errors for the
+    /// appropriate cases (i.e. out of range).
+    ///
+    /// Implementors should try to leave the actual storage unaltered when
+    /// errors happen wherever possible (i.e. check that `sector_idx` is in
+    /// range _before_ starting to modify anything; strive to be _atomic_).
+    ///
+    /// This function has a naïve default implementation; implementors that can
+    /// provide a more performant way to read in more than a word at a time
+    /// should override this.
+    fn write_sector(
+        &mut self,
+        sector_idx: usize,
+        words: &GenericArray<Self::Word, Self::SECTOR_SIZE>,
+    ) -> Result<(), WriteError<Self::WriteErr>>;
+
+    // TODO!
+    // fn write_sectors(&mut self, starting_sector_idx: usize, buffer: &mut [Self::Word])
+    // takes a flat array of bytes; it's length must be a multiple of the sector
+    // size in words.
+
+    // TODO!
+    // provide a default impl that does error checking and then calls
+    // write_sector_with_words
+    // /// `sector_idx` must be [0, `self.capacity()`) for this to succeed.
+    // ///
+    // /// Returns a slice pointing to the remaining bytes that were not written.
+    // fn write_sector_with_bytes(
+    //     &mut self,
+    //     sector_idx: usize,
+    //     bytes: &[u8]
+    // ) -> Result<&[u8], WriteError<Self::WriteErr>>;
+
+    // TODO!
+    // have write_sector have a default impl that calls this.
+    // this should do error checking and what not (i.e. add the standard docs)
+    // fn write_sector_with_words(
+    //     &mut self,
+    //     sector_idx: usize,
+    //     sectors: &[Self::Word]
+    // ) -> Result<(), WriteError<Self::WriteErr>>;
+
+    // TODO!
+    // type EraseErr;
+    // turn Eraseable into a marker trait, move its function over to here.
+    // provide a default impl that just calls write_sector on an array of
+    // zeros for all sectors
+    // add a note cautioning that the default impl may allocate lots of
+    // stack space (1 whole sector's worth).
+}
+
+pub trait WordReadable: Storage {
     /// Implementations may return `ReadError::Uninitialized` for memory
     /// locations that have not been written to at their discretion.
     ///
@@ -112,74 +182,4 @@ pub trait Storage {
 
         Ok(())
     }
-
-    /// Reads in an entire sector.
-    ///
-    /// This has a default implementation that just calls `read_words`;
-    /// implementations that are able to do better for their specific medium
-    /// should provide their own (better) implementation.
-    ///
-    /// Alternatively, if an implementation detects when calls to `read_words`
-    /// can take advantage of entire sector reads, there is no need to override
-    /// this function; the default implementation will also benefit from this.
-    #[inline]
-    fn read_sector(
-        &mut self,
-        sector_idx: usize,
-        buffer: &mut GenericArray<Self::Word, Self::SECTOR_SIZE>,
-    ) -> Result<(), ReadError<Self::ReadErr>> {
-        self.read_words(
-            sector_idx * Self::SECTOR_SIZE::to_usize(),
-            buffer.as_mut_slice()
-        )
-    }
-
-    /// Writes out an entire sector.
-    ///
-    /// `sector_idx` must be in [0, `self.capacity()`) for this to succeed.
-    ///
-    /// This function should never panic but can return errors for the
-    /// appropriate cases (i.e. out of range).
-    ///
-    /// Implementors should try to leave the actual storage unaltered when
-    /// errors happen wherever possible (i.e. check that `sector_idx` is in
-    /// range _before_ starting to modify anything; strive to be _atomic_).
-    ///
-    /// This function has a naïve default implementation; implementors that can
-    /// provide a more performant way to read in more than a word at a time
-    /// should override this.
-    fn write_sector(
-        &mut self,
-        sector_idx: usize,
-        words: &GenericArray<Self::Word, Self::SECTOR_SIZE>,
-    ) -> Result<(), WriteError<Self::WriteErr>>;
-
-    // TODO!
-    // provide a default impl that does error checking and then calls
-    // write_sector_with_words
-    // /// `sector_idx` must be [0, `self.capacity()`) for this to succeed.
-    // ///
-    // /// Returns a slice pointing to the remaining bytes that were not written.
-    // fn write_sector_with_bytes(
-    //     &mut self,
-    //     sector_idx: usize,
-    //     bytes: &[u8]
-    // ) -> Result<&[u8], WriteError<Self::WriteErr>>;
-
-    // TODO!
-    // have write_sector have a default impl that calls this.
-    // this should do error checking and what not (i.e. add the standard docs)
-    // fn write_sector_with_words(
-    //     &mut self,
-    //     sector_idx: usize,
-    //     sectors: &[Self::Word]
-    // ) -> Result<(), WriteError<Self::WriteErr>>;
-
-    // TODO!
-    // type EraseErr;
-    // turn Eraseable into a marker trait, move its function over to here.
-    // provide a default impl that just calls write_sector on an array of
-    // zeros for all sectors
-    // add a note cautioning that the default impl may allocate lots of
-    // stack space (1 whole sector's worth).
 }
