@@ -87,18 +87,18 @@ impl<W: Debug, E: Debug> From<E> for EraseError<W, E> {
 }
 
 using_std! {
-    use std::fmt;
+    use std::fmt::{self, Display};
 
     macro_rules! display_using_debug {
-        ($ty:ty) => { impl<T: fmt::Debug> Display for $ty<T> {
+        ($ty:tt) => { impl<T: Debug> Display for $ty<T> {
             fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-                Debug::fmt(fmt)
+                Debug::fmt(self, fmt)
             }
         }};
     }
 
     macro_rules! err {
-        ($ty:ty) => {
+        ($ty:tt) => {
             display_using_debug!($ty);
 
             impl<T: Debug> std::error::Error for $ty<T> { }
@@ -107,5 +107,5 @@ using_std! {
 
     err!(WriteError);
     err!(ReadError);
-    err!(EraseError);
+    // err!(EraseError); // TODO: fix
 }
