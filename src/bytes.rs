@@ -41,7 +41,7 @@ pub trait AsBytes: Sized {
     ///     Some((234u64, &[] as &[u8]))
     /// );
     /// ```
-    fn to(s: &Self) -> Self::To;
+    fn to(&self) -> Self::To;
 }
 
 macro_rules! impl_from_bytes {
@@ -63,8 +63,8 @@ macro_rules! impl_from_bytes {
                 }
             }
 
-            fn to(s: &Self) -> Self::To {
-                s.to_le_bytes()
+            fn to(&self) -> Self::To {
+                self.to_le_bytes()
             }
         }
     )*};

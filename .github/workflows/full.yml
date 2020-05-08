@@ -12,6 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ windows-latest, ubuntu-latest, macOS-latest ]
+        # features: ['', '--no-default-features'] # TODO!
         rust:
           - stable
           - beta

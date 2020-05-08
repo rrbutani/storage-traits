@@ -57,17 +57,18 @@ pub use extensions::*;
 
 pub mod errors;
 
+// TODO: move to its own file
 using_std! {
     use std::convert::TryInto;
     use std::fs::{File, OpenOptions};
-    use std::marker::PhantomData;
     use std::io::{Result as IoResult, ErrorKind, Error, Read, Write, Seek, SeekFrom};
+    use std::marker::PhantomData;
+    use std::path::Path;
 
-    use generic_array::ArrayLength;
-    use typenum::marker_traits::Unsigned;
+    use generic_array::{ArrayLength, GenericArray};
 
     #[allow(non_camel_case_types)]
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub struct FileBackedStorage<
         Word = u8,
         SECTOR_SIZE = typenum::consts::P512,
@@ -96,7 +97,11 @@ using_std! {
                 .create_new(true)
                 .open(path)?;
 
-            file.set_len(S::to_usize().checked_mul(size_in_sectors).unwrap())?;
+            file.set_len(
+                S::to_u64()
+                    .checked_mul(size_in_sectors.try_into().unwrap())
+                    .unwrap()
+            )?;
 
             Ok(Self {
                 file,
@@ -161,7 +166,7 @@ using_std! {
 
             // Move into place:
             let _ = self.file.seek(SeekFrom::Start(
-                sector_idx.checked_mul(S::to_usize()).try_into().unwrap()
+                sector_idx.checked_mul(S::to_usize()).unwrap().try_into().unwrap()
             ))?;
 
             // Do the read.
@@ -177,7 +182,7 @@ using_std! {
             for idx in 0..(S::to_usize()) {
                 let (word, remaining) = AsBytes::from(buf).unwrap();
 
-                *buffer.as_mut_slice()[idx] = word;
+                buffer.as_mut_slice()[idx] = word;
                 buf = remaining;
             }
 
@@ -198,7 +203,7 @@ using_std! {
 
             // Move into place:
             let _ = self.file.seek(SeekFrom::Start(
-                sector_idx.checked_mul(S::to_usize()).try_into().unwrap()
+                sector_idx.checked_mul(S::to_usize()).unwrap().try_into().unwrap()
             ))?;
 
             // Do the write.
@@ -207,9 +212,9 @@ using_std! {
             let sector_size_in_bytes = S::to_usize() * W::NUM_BYTES;
             let mut buf: Vec<u8> = Vec::with_capacity(sector_size_in_bytes);
 
-            for word in *words.iter() {
-                for bytes in words.to().as_ref().iter() {
-                    buf.push(bytes);
+            for word in words.iter() {
+                for bytes in word.to().as_ref().iter() {
+                    buf.push(*bytes);
                 }
             }
 
